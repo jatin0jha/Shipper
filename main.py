@@ -1,6 +1,7 @@
 from dotenv import load_dotenv
 import os
 import discord
+from discord.ext import commands
 import hashlib  # For deterministic hashing
 
 # Load environment variables
@@ -14,8 +15,17 @@ if not TOKEN:
 intents = discord.Intents.default()
 intents.message_content = True
 
-# Initialize the client
-client = discord.Client(intents=intents)
+# Initialize bot with commands
+class MyBot(commands.Bot):
+    def __init__(self):
+        super().__init__(command_prefix="!", intents=intents)
+
+    async def setup_hook(self):
+        # Sync slash commands
+        await self.tree.sync()
+        print("Slash commands synced!")
+
+bot = MyBot()
 
 # Function to calculate affection percentage deterministically
 def calculate_affection(user1, user2):
@@ -34,6 +44,8 @@ def calculate_affection(user1, user2):
         meaning = "Soulmates! ❤️"
     elif affection >= 80:
         meaning = "Perfect Match! 💕"
+    elif affection == 69:
+        meaning = "( ¬ᴗ¬)"
     elif affection >= 60:
         meaning = "Great Chemistry! 😊"
     elif affection >= 40:
@@ -47,17 +59,23 @@ def calculate_affection(user1, user2):
     
     return affection, meaning
 
-@client.event
-async def on_ready():
-    print(f'Bot logged in as {client.user}')
+# Slash command for shipping
+@bot.tree.command(name="ship", description="Ship two users and see their affection percentage!")
+async def ship(interaction: discord.Interaction, user1: discord.Member, user2: discord.Member):
+    affection, meaning = calculate_affection(user1, user2)
+    await interaction.response.send_message(
+        f"💘 Shipping {user1.mention} and {user2.mention}...\n"
+        f"**Affection: {affection}%**\n**Result: {meaning}**"
+    )
 
-@client.event
+# Handling --ship text-based command
+@bot.event
 async def on_message(message):
     # Ignore bot's own messages
-    if message.author == client.user:
+    if message.author == bot.user:
         return
 
-    # Check for `--ship` command
+    # Check for --ship command
     if message.content.startswith('--ship'):
         # Split command and check if it has two mentions
         mentions = message.mentions
@@ -68,11 +86,18 @@ async def on_message(message):
         user1, user2 = mentions[0], mentions[1]
         affection, meaning = calculate_affection(user1, user2)
 
-        # Send response
+        # Send response for text-based command
         await message.channel.send(
             f"💘 Shipping {user1.mention} and {user2.mention}...\n"
             f"**Affection: {affection}%**\n**Result: {meaning}**"
         )
 
+    # Make sure to process commands after the on_message event
+    await bot.process_commands(message)
+
+@bot.event
+async def on_ready():
+    print(f'Bot logged in as {bot.user}')
+
 # Run the bot
-client.run(TOKEN)
+bot.run(TOKEN)
