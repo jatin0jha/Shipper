@@ -76,12 +76,12 @@ def calculate_synastry_relation(angle1, angle2):
     diff = abs(angle1 - angle2) % 360
     if diff > 180:
         diff = 360 - diff  # Normalize to 0-180 degrees
-    # Interpret the aspect into synastry relation
-    if abs(diff - 0) <= 6 or abs(diff - 180) <= 6:  # Conjunction or Opposition
+    # Adjusted tolerance for aspects
+    if abs(diff - 0) <= 10 or abs(diff - 180) <= 10:  # Conjunction or Opposition
         return "Attraction"
-    elif abs(diff - 90) <= 6:  # Square
+    elif abs(diff - 90) <= 10:  # Square
         return "Tension"
-    elif abs(diff - 60) <= 6 or abs(diff - 120) <= 6:  # Sextile or Trine
+    elif abs(diff - 60) <= 10 or abs(diff - 120) <= 10:  # Sextile or Trine
         return "Neutral"
     else:
         return "Neutral"
@@ -91,17 +91,22 @@ def analyze_simplified_synastry(chart1, chart2):
     attraction_count = 0
     tension_count = 0
     neutral_count = 0
-    
+
+    # Debug: print positions of planets for both charts
+    print("User 1 Chart:", chart1)
+    print("User 2 Chart:", chart2)
+
     for planet1, position1 in chart1.items():
         for planet2, position2 in chart2.items():
             relation = calculate_synastry_relation(position1, position2)
+            print(f"Synastry between {planet1} ({position1}°) and {planet2} ({position2}°): {relation}")
             if relation == "Attraction":
                 attraction_count += 1
             elif relation == "Tension":
                 tension_count += 1
             else:
                 neutral_count += 1
-    
+
     # Determine the dominant relation
     if attraction_count > tension_count and attraction_count > neutral_count:
         return "Attraction"
