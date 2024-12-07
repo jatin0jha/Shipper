@@ -34,7 +34,7 @@ const compatibilityChart = {
     Sagittarius: { Aries: 90, Leo: 85, Aquarius: 80 },
     Capricorn: { Taurus: 88, Virgo: 85, Scorpio: 80 },
     Aquarius: { Gemini: 90, Libra: 85, Sagittarius: 80 },
-    Pisces: { Cancer: 90, Scorpio: 85, Taurus: 80 }
+    Pisces: { Cancer: 90, Scorpio: 85, Taurus: 80, Virgo: 80 }
 };
 
 // Zodiac sign calculator based on date of birth (DOB)
